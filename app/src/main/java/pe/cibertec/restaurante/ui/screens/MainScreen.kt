@@ -20,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import pe.cibertec.restaurante.R
+import pe.cibertec.restaurante.ui.model.Producto
+import pe.cibertec.restaurante.ui.model.productosDemo
 
 data class NavigationItem(
     val title: String,
@@ -32,6 +34,14 @@ fun MainScreen(
 ) {
     var selectedItem by remember {
         mutableStateOf(0)
+    }
+
+    var productos by remember {
+        mutableStateOf(productosDemo)
+    }
+
+    var productoSeleccionado by remember {
+        mutableStateOf<Producto?>(null)
     }
 
     val navigationItems = listOf(
@@ -64,6 +74,7 @@ fun MainScreen(
                         selected = selectedItem == index,
                         onClick = {
                             selectedItem = index
+                            productoSeleccionado = null
                         },
                         icon = {
                             Icon(
@@ -101,10 +112,39 @@ fun MainScreen(
             }
 
             2 -> {
-                TemporaryScreen(
-                    title = "Productos",
-                    modifier = Modifier.padding(innerPadding)
-                )
+                if (productoSeleccionado == null) {
+                    ListaProductosScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        productos = productos,
+                        onProductoClick = { producto ->
+                            productoSeleccionado = producto
+                        },
+                        onAgregarClick = {
+                            // Más adelante se conectará con Nuevo Producto
+                        },
+                        onBack = {
+                            selectedItem = 0
+                        }
+                    )
+                } else {
+                    DetalleProductoScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        producto = productoSeleccionado!!,
+                        onBack = {
+                            productoSeleccionado = null
+                        },
+                        onEditar = {
+                            // Más adelante se conectará con Editar Producto
+                        },
+                        onEliminar = {
+                            productos = productos.filter { producto ->
+                                producto.id != productoSeleccionado!!.id
+                            }
+
+                            productoSeleccionado = null
+                        }
+                    )
+                }
             }
 
             3 -> {
